@@ -54,7 +54,7 @@ public class DailyPlaytimeTicker {
 
             if (limit != null && limit.left <= 0) {
                 DPCStore.save();
-                player.connection.disconnect(Component.literal("You have reached your daily playtime limit. Try again tomorrow."));
+                player.connection.disconnect(Component.literal("You have reached your playtime limit for today."));
             }
         }
     }

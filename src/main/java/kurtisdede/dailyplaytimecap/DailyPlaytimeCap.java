@@ -7,9 +7,9 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.server.players.NameAndId;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.player.Player;
@@ -33,7 +33,7 @@ public class DailyPlaytimeCap implements ModInitializer {
 			dispatcher.register(
 					Commands.literal("dailyplaytime")
 							.then(Commands.literal("set")
-									.requires(source -> source.hasPermission(2))
+									.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_MODERATOR))
 									.then(Commands.argument("player", GameProfileArgument.gameProfile())
 											.suggests(
 													(commandContext, suggestionsBuilder) -> {
@@ -67,12 +67,12 @@ public class DailyPlaytimeCap implements ModInitializer {
 														);
 													}
 											)
-											.requires(source -> source.hasPermission(2))
+											.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_MODERATOR))
 											.executes(DPCCommands::executeDailyPlaytimeCheckOther)
 									)
 							)
 							.then(Commands.literal("remove")
-									.requires(source -> source.hasPermission(2))
+									.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_MODERATOR))
 									.then(Commands.argument("player", GameProfileArgument.gameProfile())
 											.suggests(
 													(commandContext, suggestionsBuilder) -> {
