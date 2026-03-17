@@ -105,8 +105,6 @@ public class DailyPlaytimeCap implements ModInitializer {
 		});
 
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-			UUID uuid = handler.player.getUUID();
-
 			DPCStore.save();
 		});
 
