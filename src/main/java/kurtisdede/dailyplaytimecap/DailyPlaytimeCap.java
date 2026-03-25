@@ -3,6 +3,7 @@ package kurtisdede.dailyplaytimecap;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.commands.Commands;
@@ -30,68 +31,87 @@ public class DailyPlaytimeCap implements ModInitializer {
 
 		// register commands
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-			dispatcher.register(
-					Commands.literal("dailyplaytime")
-							.then(Commands.literal("set")
-									.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_MODERATOR))
-									.then(Commands.argument("player", GameProfileArgument.gameProfile())
-											.suggests(
-													(commandContext, suggestionsBuilder) -> {
-														PlayerList playerList = commandContext.getSource().getServer().getPlayerList();
-														return SharedSuggestionProvider.suggest(
-																playerList.getPlayers()
-																		.stream()
-																		.map(Player::nameAndId)
-																		.map(NameAndId::name),
-																suggestionsBuilder
-														);
-													}
-											)
-											.then(Commands.argument("time_minutes", IntegerArgumentType.integer())
-													.executes(DPCCommands::executeDailyPlaytimeSet)
-											)
-									)
-							)
-							.then(Commands.literal("check")
-									.executes(DPCCommands::executeDailyPlaytimeCheck)
-									.then(Commands.argument("player", GameProfileArgument.gameProfile())
-											.suggests(
-													(commandContext, suggestionsBuilder) -> {
-														PlayerList playerList = commandContext.getSource().getServer().getPlayerList();
-														return SharedSuggestionProvider.suggest(
-																playerList.getPlayers()
-																		.stream()
-																		.map(Player::nameAndId)
-																		.map(NameAndId::name),
-																suggestionsBuilder
-														);
-													}
-											)
+					dispatcher.register(
+							Commands.literal("dailyplaytime")
+									.then(Commands.literal("set")
 											.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_MODERATOR))
-											.executes(DPCCommands::executeDailyPlaytimeCheckOther)
-									)
-							)
-							.then(Commands.literal("remove")
-									.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_MODERATOR))
-									.then(Commands.argument("player", GameProfileArgument.gameProfile())
-											.suggests(
-													(commandContext, suggestionsBuilder) -> {
-														PlayerList playerList = commandContext.getSource().getServer().getPlayerList();
-														return SharedSuggestionProvider.suggest(
-																playerList.getPlayers()
-																		.stream()
-																		.map(Player::nameAndId)
-																		.map(NameAndId::name),
-																suggestionsBuilder
-														);
-													}
+											.then(Commands.argument("player", GameProfileArgument.gameProfile())
+													.suggests(
+															(commandContext, suggestionsBuilder) -> {
+																PlayerList playerList = commandContext.getSource().getServer().getPlayerList();
+																return SharedSuggestionProvider.suggest(
+																		playerList.getPlayers()
+																				.stream()
+																				.map(Player::nameAndId)
+																				.map(NameAndId::name),
+																		suggestionsBuilder
+																);
+															}
+													)
+													.then(Commands.argument("time_minutes", IntegerArgumentType.integer(1, 1440))
+															.executes(DPCCommands::executeDailyPlaytimeSet)
+													)
 											)
-											.executes(DPCCommands::executeDailyPlaytimeRemove)
 									)
-							)
-			);
+									.then(Commands.literal("check")
+											.executes(DPCCommands::executeDailyPlaytimeCheck)
+											.then(Commands.argument("player", GameProfileArgument.gameProfile())
+													.suggests(
+															(commandContext, suggestionsBuilder) -> {
+																PlayerList playerList = commandContext.getSource().getServer().getPlayerList();
+																return SharedSuggestionProvider.suggest(
+																		playerList.getPlayers()
+																				.stream()
+																				.map(Player::nameAndId)
+																				.map(NameAndId::name),
+																		suggestionsBuilder
+																);
+															}
+													)
+													.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_MODERATOR))
+													.executes(DPCCommands::executeDailyPlaytimeCheckOther)
+											)
+									)
+									.then(Commands.literal("remove")
+											.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_MODERATOR))
+											.then(Commands.argument("player", GameProfileArgument.gameProfile())
+													.suggests(
+															(commandContext, suggestionsBuilder) -> {
+																PlayerList playerList = commandContext.getSource().getServer().getPlayerList();
+																return SharedSuggestionProvider.suggest(
+																		playerList.getPlayers()
+																				.stream()
+																				.map(Player::nameAndId)
+																				.map(NameAndId::name),
+																		suggestionsBuilder
+																);
+															}
+													)
+													.executes(DPCCommands::executeDailyPlaytimeRemove)
+											)
+									)
+									.then(Commands.literal("add_extra_time")
+											.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_MODERATOR))
+											.then(Commands.argument("player", GameProfileArgument.gameProfile())
+													.suggests(
+															(commandContext, suggestionsBuilder) -> {
+																PlayerList playerList = commandContext.getSource().getServer().getPlayerList();
+																return SharedSuggestionProvider.suggest(
+																		playerList.getPlayers()
+																				.stream()
+																				.map(Player::nameAndId)
+																				.map(NameAndId::name),
+																		suggestionsBuilder
+																);
+															}
+													)
+													.then(Commands.argument("time_minutes", IntegerArgumentType.integer(1, 1440))
+															.executes(DPCCommands::executeDailyPlaytimeAddExtraTime)
+													)
+											)
+									)
+					);
 		});
-
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
 			UUID uuid = handler.player.getUUID();
 			DPCStore.resetIfNewDay();
@@ -104,7 +124,7 @@ public class DailyPlaytimeCap implements ModInitializer {
 			}
 		});
 
-		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			DPCStore.save();
 		});
 

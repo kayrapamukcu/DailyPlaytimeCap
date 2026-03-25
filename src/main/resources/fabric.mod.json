@@ -2,37 +2,29 @@
 	"schemaVersion": 1,
 	"id": "dailyplaytimecap",
 	"version": "${version}",
-	"name": "DailyPlaytimeCap",
+	"name": "dailyplaytimecap",
 	"description": "Set a daily playtime limit for players on your server",
 	"authors": [
-		"Me!"
+		"Kurtisdede"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": "https://github.com/kayrapamukcu/DailyPlaytimeCap"
 	},
-	"license": "CC0-1.0",
+	"license": "MIT",
 	"icon": "assets/dailyplaytimecap/icon.png",
-	"environment": "server",
+	"environment": "*",
 	"entrypoints": {
 		"main": [
 			"kurtisdede.dailyplaytimecap.DailyPlaytimeCap"
-		],
-		"client": [
-			"kurtisdede.dailyplaytimecap.DailyPlaytimeCapClient"
 		]
 	},
 	"mixins": [
-		"dailyplaytimecap.mixins.json",
-		{
-			"config": "dailyplaytimecap.client.mixins.json",
-			"environment": "client"
-		}
+		"dailyplaytimecap.mixins.json"
 	],
 	"depends": {
-		"fabricloader": ">=0.17.3",
-		"minecraft": "~1.21.11",
-		"java": ">=21",
-		"fabric-api": ">=0.133.14"
+		"fabricloader": ">=0.18.4",
+		"minecraft": "~26.1",
+		"java": ">=25",
+		"fabric-api": "*"
 	}
 }

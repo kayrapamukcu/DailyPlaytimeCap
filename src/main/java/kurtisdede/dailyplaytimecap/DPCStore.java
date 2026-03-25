@@ -2,6 +2,7 @@ package kurtisdede.dailyplaytimecap;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.IOException;
@@ -42,6 +43,15 @@ public class DPCStore {
     public static void setLimit(UUID uuid, int seconds) {
         savedata.limits.put(uuid.toString(), new PlayerLimit(seconds, seconds));
         save();
+    }
+
+    public static void addExtraTime(UUID uuid, int seconds) {
+        PlayerLimit limit = getLimit(uuid);
+        if (limit != null) {
+            limit.left += seconds;
+            limit.left = Math.min(limit.left, 1440 * 60);
+            save();
+        }
     }
 
     public static boolean removeLimit(UUID uuid) {
@@ -106,6 +116,11 @@ public class DPCStore {
                     }
                 }
             }
+        } catch (JsonParseException e) {
+            DailyPlaytimeCap.LOGGER.warn("Malformed daily playtime data at {}. Recreating empty limits file.", FILE, e);
+            savedata = new SaveData();
+            savedata.lastResetDate = LocalDate.now().toString();
+            save();
         } catch (IOException e) {
             throw new RuntimeException("Failed to load daily playtime limits", e);
         }

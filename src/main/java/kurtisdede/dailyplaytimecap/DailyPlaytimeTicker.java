@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class DailyPlaytimeTicker {
+public class  DailyPlaytimeTicker {
     private static int lastProcessedMinute = -1;
     private static int lastProcessedSecond = -1;
     private static String lastProcessedDate = "";
@@ -53,7 +53,6 @@ public class DailyPlaytimeTicker {
             }
 
             if (limit != null && limit.left <= 0) {
-                DPCStore.save();
                 player.connection.disconnect(Component.literal("You have reached your playtime limit for today."));
             }
         }

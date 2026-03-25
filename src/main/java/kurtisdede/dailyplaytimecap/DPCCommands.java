@@ -16,8 +16,7 @@ public class DPCCommands {
 	public static int executeDailyPlaytimeSet(CommandContext<CommandSourceStack> context) throws CommandSyntaxException{
 		Collection<NameAndId> targets = GameProfileArgument.getGameProfiles(context, "player");
 
-		int minutes_r = context.getArgument("time_minutes", Integer.class);
-		final int minutes = Math.max(1, Math.min(minutes_r, 1440));
+		final int minutes = context.getArgument("time_minutes", Integer.class);
 
 		for(NameAndId target : targets) {
 			UUID uuid = target.id();
@@ -82,6 +81,31 @@ public class DPCCommands {
 				continue;
 			}
 			context.getSource().sendSuccess(() -> Component.literal(name + " has " + limit.left / 60 + " minute(s), " + limit.left % 60 + " second(s) left."), false);
+		}
+
+		return 1;
+	}
+	public static int executeDailyPlaytimeAddExtraTime(CommandContext<CommandSourceStack> context) throws CommandSyntaxException{
+		Collection<NameAndId> targets = GameProfileArgument.getGameProfiles(context, "player");
+
+		final int minutes = context.getArgument("time_minutes", Integer.class);
+
+		for(NameAndId target : targets) {
+			UUID uuid = target.id();
+			String name = target.name();
+
+			DPCStore.PlayerLimit limit = DPCStore.getLimit(uuid);
+			if (limit == null) {
+				context.getSource().sendFailure(Component.literal(name + " does not have a daily playtime limit set."));
+				continue;
+			}
+
+			DPCStore.addExtraTime(uuid, minutes * 60);
+
+			context.getSource().sendSuccess(() -> Component.literal("Added " + minutes + " minute(s) to " + name + "'s playtime for today."), false);
+			ServerPlayer onlinePlayer = context.getSource().getServer().getPlayerList().getPlayer(uuid);
+			if(onlinePlayer != null)
+				onlinePlayer.sendSystemMessage(Component.literal("+" + minutes + " minute(s) have been added to your playtime for today."), false);
 		}
 
 		return 1;
