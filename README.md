@@ -8,7 +8,7 @@ A server-side Minecraft mod that lets administrators set daily playtime limits f
 - Check remaining time
 - Remove a limit
 - Automatically kicks players when their time runs out (they can't relog for the day)
-- Add extra time for a player for the day
+- Add extra time for a player for that day
 
 ## Commands
 - `/dailyplaytime set <player> <minutes>`
